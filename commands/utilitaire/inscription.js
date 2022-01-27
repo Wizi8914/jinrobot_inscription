@@ -42,8 +42,11 @@ module.exports = class SayCommand extends Command {
             if(button.id == "ticket") {
                 if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
-                    message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(channel => {
-                        channel.overwritePermissions([
+                    message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
+                        let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
+                        channel.setParent(category.id);
+                        const chan = message.guild.channels.cache.get(channel.id)
+                        await chan.overwritePermissions([
                             {
                                 id: "933760704006209649", 
                                 deny: ["VIEW_CHANNEL"]
@@ -53,12 +56,7 @@ module.exports = class SayCommand extends Command {
                                 allow: ["VIEW_CHANNEL"]
                             }
                         ])
-                        
-                        let role = message.guild.roles.cache.get("933760704006209649")
 
-                        let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
-                        channel.setParent(category.id);
-                        const chan = message.guild.channels.cache.get(channel.id)
                         const filter = m => button.clicker.id == m.author.id;
                         chan.send(`:hand_splayed: Bonjour **${button.clicker.user.username}** !\nMerci d'avoir cliquer sur le bouton pour vous inscrire nous allons procéder a votre inscription.\n\nPour débuter veuiller préciser votre pseudo **Minecraft**`).then(async () => {
                             chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
@@ -190,6 +188,13 @@ module.exports = class SayCommand extends Command {
                                         button.message.edit({embed: embed, buttons: [oui, non]})
 
                                         const { username } = await minecraftPlayer(uuid)
+
+
+                                        
+
+
+
+
                                         chan.send(`suite de la commande, Pseudo Minecraft: (${username})`)
 
                                     }
