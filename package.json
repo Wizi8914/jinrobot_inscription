@@ -1,0 +1,50 @@
+{
+  "name": "bot",
+  "botversion": "1.9.4",
+  "description": "Amaterasu for kinoko",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "lavalink": "java -jar Lavalink.jar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wizi8914/Amaterasu.git"
+  },
+  "author": "Wizi",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "github:discordjs/opus",
+    "canvas": "^2.7.0",
+    "cpu-stat": "^2.0.1",
+    "deepl": "^1.0.12",
+    "deepl-web": "^1.2.1",
+    "discord-buttons": "^4.0.0",
+    "discord-giveaways": "^4.4.3",
+    "discord.js": "^12.5.1",
+    "discord.js-commando": "github:discordjs/commando",
+    "dotenv": "^10.0.0",
+    "erela.js": "^2.3.3",
+    "ffmpeg": "0.0.4",
+    "ffmpeg-static": "^4.2.7",
+    "google-search-results-nodejs": "^2.0.1",
+    "jsoning": "^0.11.22",
+    "lavasfy": "^2.3.0",
+    "lyrics-finder": "^21.7.0",
+    "mathjs": "^9.3.2",
+    "minecraft-player": "^1.0.1",
+    "moment": "^2.29.1",
+    "node-fetch": "^2.6.1",
+    "node-osu": "^2.2.1",
+    "open-graph": "^0.2.1",
+    "pretty-ms": "^7.0.1",
+    "spdl-core": "^2.0.2",
+    "spotify-web-api-node": "^5.0.2",
+    "weky": "^3.1.2",
+    "wikipedia": "^1.1.2",
+    "youtube-search": "^1.1.6",
+    "ytdl-core": "^4.9.0",
+    "ytpl": "^2.1.0"
+  }
+}
