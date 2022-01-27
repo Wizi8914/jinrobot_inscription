@@ -6,7 +6,7 @@ const { MessageButton } = require('discord-buttons')
 module.exports = class SayCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'say',
+            name: 'inscription',
             group: 'utilitaire',
             memberName: 'say',
             description: 'dit ce que tu veut aux bot '
@@ -29,6 +29,7 @@ module.exports = class SayCommand extends Command {
             .setLabel('📩')
             .setID('ticket')
 
+        message.delete()
         message.say({embed: embed, buttons: [ticket]});
         this.client.on('clickButton', async (button) => {
             const userclick = button.clicker.user.id
@@ -36,6 +37,23 @@ module.exports = class SayCommand extends Command {
                 if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(channel => {
+                        let role = message.guild.roles.cache.find('name', "Staff");
+                        let role2 = message.guild.roles.find("name", "@everyone");
+
+                        channel.overwritePermissions(button.clicker.user, {
+                            SEND_MESSAGES: true,
+                            READ_MESSAGES: true
+                        });
+                        channel.overwritePermissions(role, {
+                            SEND_MESSAGES: true,
+                            READ_MESSAGES: true
+                        });
+                        channel.overwritePermissions(role2, {
+                            SEND_MESSAGES: false,
+                            READ_MESSAGES: false
+                        });
+
+
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
                         const chan = message.guild.channels.cache.get(channel.id)
@@ -170,7 +188,7 @@ module.exports = class SayCommand extends Command {
                                         button.message.edit({embed: embed, buttons: [oui, non]})
 
                                         const { username } = await minecraftPlayer(uuid)
-                                        chan.send('suite de la commande' + username)
+                                        chan.send(`suite de la commande, Pseudo Minecraft: (${username})`)
 
                                     }
                                 })
