@@ -19,7 +19,14 @@ module.exports = class SayCommand extends Command {
      */
 
     async run(message, args) {
-
+        if(!message.member.hasPermission("ADMINISTRATOR")) {
+            return message.say(UserMissingPermision).then(async(no) => {
+                setTimeout(() => {
+                    no.delete()
+                }, 5000);
+            })
+        }
+        
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setTitle(`Cliquez sur la réaction pour vous inscrire !`)
@@ -32,27 +39,22 @@ module.exports = class SayCommand extends Command {
         message.delete()
         message.say({embed: embed, buttons: [ticket]});
         this.client.on('clickButton', async (button) => {
-            const userclick = button.clicker.user.id
             if(button.id == "ticket") {
                 if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(channel => {
-                        let role = message.guild.roles.cache.find('name', "Staff");
-                        let role2 = message.guild.roles.find("name", "@everyone");
-
-                        channel.overwritePermissions(button.clicker.user, {
-                            SEND_MESSAGES: true,
-                            READ_MESSAGES: true
-                        });
-                        channel.overwritePermissions(role, {
-                            SEND_MESSAGES: true,
-                            READ_MESSAGES: true
-                        });
-                        channel.overwritePermissions(role2, {
-                            SEND_MESSAGES: false,
-                            READ_MESSAGES: false
-                        });
-
+                        channel.overwritePermissions([
+                            {
+                                id: "933760704006209649", 
+                                deny: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: button.clicker.user.id, 
+                                allow: ["VIEW_CHANNEL"]
+                            }
+                        ])
+                        
+                        let role = message.guild.roles.cache.get("933760704006209649")
 
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
