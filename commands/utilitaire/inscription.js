@@ -63,15 +63,15 @@ module.exports = class SayCommand extends Command {
                                 message = message.first()
                                 var mcpseudo = message.content
 
-                                var oui = new MessageButton()
-                                    .setStyle('gray')
+                                let oui = new MessageButton()
                                     .setLabel('✔️')
                                     .setID('oui')
+                                    .setStyle('green')
                                 
-                                var non = new MessageButton()
-                                    .setStyle('gray')
+                                let non = new MessageButton()
                                     .setLabel('❌')
                                     .setID('non')
+                                    .setStyle('red')
 
 
                                 try {
@@ -100,22 +100,21 @@ module.exports = class SayCommand extends Command {
                                     }
                                 }
 
-                                let validskin = 0
 
+                                let uuid = (await minecraftPlayer(mcpseudo)).uuid
+                                let mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
+                                let pseudo = (await minecraftPlayer(uuid)).username
 
-                                const { uuid } = await minecraftPlayer(mcpseudo)
-                                const mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
-
-                                var embed = new MessageEmbed()
+                                let embed = new MessageEmbed()
                                     .setColor('GREEN')
                                     .setTitle(`Est-ce bien Vous ?`)
+                                    .addField('Pseudonyme:', pseudo)
                                     .addField('UUID:', uuid)
                                     .setImage(mcskin)
         
                                 chan.send({embed: embed, buttons: [oui, non]});
-                                let lp = 0
+
                                 this.client.on('clickButton', async (button) => {
-                                    chan.send('test')
                                     if(button.id == "non") {
                                         button.reply.defer()
                                         oui.setDisabled()
@@ -123,7 +122,7 @@ module.exports = class SayCommand extends Command {
 
                                         button.message.edit({embed: embed, buttons: [oui, non]})
 
-                                        chan.send(`Ce n'est pas vous ? veuiller alors rentrer a nouveau votre pseudo Minecraft`)
+                                        chan.send(`:question: **Ce n'est pas vous ? Veuiller alors rentrer a nouveau votre pseudo Minecraft**`)
                                         await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                             message = message.first()
                                             mcpseudo = message.content
@@ -157,22 +156,23 @@ module.exports = class SayCommand extends Command {
                                         })
 
                                         oui = new MessageButton()
-                                            .setStyle('gray')
                                             .setLabel('✔️')
                                             .setID('oui')
+                                            .setStyle('green')
                                         
                                         non = new MessageButton()
-                                            .setStyle('gray')
                                             .setLabel('❌')
                                             .setID('non')
+                                            .setStyle('red')
 
-
-                                        const { uuid } = await minecraftPlayer(mcpseudo)
-                                        const mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
+                                        uuid  = (await minecraftPlayer(mcpseudo)).uuid
+                                        mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
+                                        pseudo = (await minecraftPlayer(uuid)).username
 
                                         embed = new MessageEmbed()
                                             .setColor('GREEN')
                                             .setTitle(`Est-ce bien Vous ?`)
+                                            .addField('Pseudonyme', pseudo)
                                             .addField('UUID:', uuid)
                                             .setImage(mcskin)
                 
@@ -187,15 +187,30 @@ module.exports = class SayCommand extends Command {
 
                                         button.message.edit({embed: embed, buttons: [oui, non]})
 
-                                        const { username } = await minecraftPlayer(uuid)
-
-
+                                        const cree = new MessageButton()
+                                            .setStyle('gray')
+                                            .setLabel('Créé')
+                                            .setID('cree')
                                         
+                                        const rejoindre = new MessageButton()
+                                            .setStyle('gray')
+                                            .setLabel('Rejouer')
+                                            .setID('rejouer')
+                                        
+                                        const noteam = new MessageButton()
+                                            .setStyle('gray')
+                                            .setLabel('Pas de team')
+                                            .setID('noteam')
+
+                                        const finalembed = new MessageEmbed()
+                                            .setColor('GREEN')
+                                            .setTitle(`Pour finir merci de cliquer sur le bouton aproprier`)
+                                            .addField("Clicker sur le bouton aproprier", "créé vous une équipe ou alors rejoigner-en une ou alors jsp")
 
 
 
+                                        chan.send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
 
-                                        chan.send(`suite de la commande, Pseudo Minecraft: (${username})`)
 
                                     }
                                 })
