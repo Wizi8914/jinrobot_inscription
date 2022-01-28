@@ -1,7 +1,9 @@
 const { MessageEmbed } = require('discord.js');
 const { Command, CommandoMessage } = require('discord.js-commando');
 const minecraftPlayer = require('minecraft-player');
-const { MessageButton } = require('discord-buttons')
+const { MessageButton } = require('discord-buttons');
+let jsoning = require("jsoning");
+let db = new jsoning("db.json");
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -205,11 +207,54 @@ module.exports = class SayCommand extends Command {
                                         const finalembed = new MessageEmbed()
                                             .setColor('GREEN')
                                             .setTitle(`Pour finir merci de cliquer sur le bouton aproprier`)
-                                            .addField("Clicker sur le bouton aproprier", "créé vous une équipe ou alors rejoigner-en une ou alors jsp")
+                                            .addField("Clicker sur le bouton aproprier", "créé vous une équipe ou alors rejoigner-en une ou alors inscriver vous meme su vous n'avez pas d'équipe")
 
 
 
                                         chan.send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+
+                                        function removebutton(button) {
+                                            button.reply.defer()
+                                            cree.setDisabled()
+                                            rejoindre.setDisabled()
+                                            noteam.setDisabled()
+                                            button.message.edit({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+                                        }
+
+                                        this.client.on('clickButton', async (button) => {
+                                            if (button.id == 'cree') {
+                                                removebutton(button)
+                                                chan.send(':white_check_mark: Vous avez décider de créé une équipe. Veuiller désormais cité ne **nom** de votre équipe')
+                                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                    message = message.first()
+                                                    try {
+                                                        await db.set(`${message.content}`, `${mcpseudo}`)
+                                                        chan.send(":white_check_mark: **Vous avez créé la team " + "`" + message.content + "`" + " avec succès**")
+                                                    } catch (error) {
+                                                        chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
+                                                    }
+                                                })
+                                            }
+                                            if (button.id == 'rejoindre') {
+                                                removebutton(button)
+                                                chan.send(":white_check_mark: Vous avez décider de rejoindre une équipe. Veuiller désormais cité ne **nom** de l'équipe que vous vouler rejoindre")
+                                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                    message = message.first()
+
+                                                    try {
+                                                        await db.push(`${message.content}`, `${mcpseudo}`)
+                                                        chan.send(":white_check_mark: **Vous avez créé la team " + "`" + message.content + "`" + " avec succès**")
+                                                    } catch (error) {
+                                                        chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
+                                                    }
+                                                })
+                                            }
+                                            if (button.id == "noteam") {
+                                                removebutton(button)
+                                                
+                                            }
+
+                                        })
 
 
                                     }
