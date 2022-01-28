@@ -196,8 +196,8 @@ module.exports = class SayCommand extends Command {
                                         
                                         const rejoindre = new MessageButton()
                                             .setStyle('gray')
-                                            .setLabel('Rejouer')
-                                            .setID('rejouer')
+                                            .setLabel('rejoindre')
+                                            .setID('rejoindre')
                                         
                                         const noteam = new MessageButton()
                                             .setStyle('gray')
@@ -237,20 +237,30 @@ module.exports = class SayCommand extends Command {
                                             }
                                             if (button.id == 'rejoindre') {
                                                 removebutton(button)
-                                                chan.send(":white_check_mark: Vous avez décider de rejoindre une équipe. Veuiller désormais cité ne **nom** de l'équipe que vous vouler rejoindre")
-                                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
-                                                    message = message.first()
 
-                                                    try {
-                                                        await db.push(`${message.content}`, `${mcpseudo}`)
-                                                        chan.send(":white_check_mark: **Vous avez créé la team " + "`" + message.content + "`" + " avec succès**")
-                                                    } catch (error) {
-                                                        chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
-                                                    }
-                                                })
+                                                chan.send('rejoindre')
+
+                                                chan.send(":white_check_mark: Vous avez décider de rejoindre une équipe. Veuiller désormais cité ne **nom** de l'équipe que vous vouler rejoindre")
+
+                                                let rej = 0
+                                                while (rej < 1) {
+                                                    await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                        message = message.first()
+    
+                                                        if (await db.has(message.content) == false) {
+                                                            chan.send(":x: **Le nom d'équipe cité n'éxiste pas veuiller rentrer un nom d'équipe valide. **");
+                                                        } else {
+                                                            await db.push(`${message.content}`, `${mcpseudo}`)
+                                                            chan.send(":white_check_mark: **Vous avez rejoint la team " + "`" + message.content + "`" + " avec succès**");
+                                                            rej = 1
+                                                        }
+                                                    })
+                                                }
                                             }
                                             if (button.id == "noteam") {
                                                 removebutton(button)
+
+                                                chan.send('pas de team')
                                                 
                                             }
 
