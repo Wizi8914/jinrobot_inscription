@@ -265,8 +265,6 @@ module.exports = class SayCommand extends Command {
                                             }
 
                                         })
-
-
                                     }
                                 })
 
