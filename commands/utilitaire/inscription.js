@@ -4,6 +4,7 @@ const minecraftPlayer = require('minecraft-player');
 const { MessageButton } = require('discord-buttons');
 let jsoning = require("jsoning");
 let db = new jsoning("db.json");
+let team = new jsoning("team.json");
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -228,7 +229,8 @@ module.exports = class SayCommand extends Command {
                                                 await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                     message = message.first()
                                                     try {
-                                                        await db.set(`${message.content}`, `${mcpseudo}`)
+                                                        await db.push(`${message.content}`, `${pseudo}`)
+                                                        await team.push("team", `${message.content}`)
                                                         chan.send(":white_check_mark: **Vous avez créé la team " + "`" + message.content + "`" + " avec succès**")
                                                     } catch (error) {
                                                         chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
@@ -238,19 +240,24 @@ module.exports = class SayCommand extends Command {
                                             if (button.id == 'rejoindre') {
                                                 removebutton(button)
 
-                                                chan.send('rejoindre')
-
                                                 chan.send(":white_check_mark: Vous avez décider de rejoindre une équipe. Veuiller désormais cité ne **nom** de l'équipe que vous vouler rejoindre")
+
+                                                for (let i = 0; i < Array(await team.get('team'))[0].length; i++) {
+                                                    const element = array[i];
+                                                    
+                                                }
+
+
 
                                                 let rej = 0
                                                 while (rej < 1) {
                                                     await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                         message = message.first()
-    
+
                                                         if (await db.has(message.content) == false) {
                                                             chan.send(":x: **Le nom d'équipe cité n'éxiste pas veuiller rentrer un nom d'équipe valide. **");
                                                         } else {
-                                                            await db.push(`${message.content}`, `${mcpseudo}`)
+                                                            await db.push(`${message.content}`, `${pseudo}`)
                                                             chan.send(":white_check_mark: **Vous avez rejoint la team " + "`" + message.content + "`" + " avec succès**");
                                                             rej = 1
                                                         }
