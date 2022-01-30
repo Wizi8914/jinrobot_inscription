@@ -31,7 +31,7 @@ client.once('disconnect', () => {
 
 client.once('ready', () => {
     console.log(`Connecté en tant que ${client.user.tag} - (${client.user.id})`);
-    client.user.setActivity('TEST', { type: 'PLAYING' });
+    client.user.setActivity('cite.jinro.eu', { type: 'PLAYING' });
 }); 
 
 client.on('error', (error) => console.error(error));

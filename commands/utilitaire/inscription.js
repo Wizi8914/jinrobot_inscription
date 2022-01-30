@@ -6,14 +6,15 @@ let jsoning = require("jsoning");
 let db = new jsoning("db.json");
 let team = new jsoning("team.json");
 let noteamlist = new jsoning("noteam.json");
+var cooldown = false
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'inscription',
             group: 'utilitaire',
-            memberName: 'say',
-            description: 'dit ce que tu veut aux bot '
+            memberName: 'inscription',
+            description: "le process d'einscription"
         });
     }
 
@@ -22,7 +23,7 @@ module.exports = class SayCommand extends Command {
      * @param {CommandoMessage} message 
      */
 
-    async run(message, args) {
+    async run(message) {
         if(!message.member.hasPermission("ADMINISTRATOR")) {
             return message.say(UserMissingPermision).then(async(no) => {
                 setTimeout(() => {
@@ -44,12 +45,21 @@ module.exports = class SayCommand extends Command {
         message.say({embed: embed, buttons: [ticket]});
         this.client.on('clickButton', async (button) => {
             if(button.id == "ticket") {
+                if(cooldown == true) {
+                    button.reply.defer()
+                    return message.say(':x: **Veuiller attendre quelques instant avant de pouvoir vous inscrire. Rééseiller dans les prochaines secondes**').then(async(no) => {
+                        setTimeout(() => {
+                            no.delete()
+                        }, 3000);
+                    })
+                }
                 if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
+                        cooldown = true
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
-                        let chan = message.guild.channels.cache.get(channel.id)
+                        const chan = message.guild.channels.cache.get(channel.id)
 
                         await chan.overwritePermissions([
                             {
@@ -285,10 +295,16 @@ module.exports = class SayCommand extends Command {
                                                 
                                             }
 
+                                            message.say('\n\n:warning: **Le Salon va maintenant se suprimer dans quelques instants**').then( () => {
+                                                setTimeout(() => {
+                                                    chan.delete()
+                                                    cooldown = false
+                                                }, 5000);
+                                            })
+
                                         })
                                     }
                                 })
-
                             })
 
                         })
