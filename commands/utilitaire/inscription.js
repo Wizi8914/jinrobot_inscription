@@ -48,7 +48,8 @@ module.exports = class SayCommand extends Command {
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
-                        const chan = message.guild.channels.cache.get(channel.id)
+                        let chan = message.guild.channels.cache.get(channel.id)
+
                         await chan.overwritePermissions([
                             {
                                 id: "933760704006209649", 
@@ -61,7 +62,7 @@ module.exports = class SayCommand extends Command {
                         ])
 
                         const filter = m => button.clicker.id == m.author.id;
-                        chan.send(`:hand_splayed: Bonjour **${button.clicker.user.username}** !\nMerci d'avoir cliquer sur le bouton pour vous inscrire nous allons procéder a votre inscription.\n\nPour débuter veuiller préciser votre pseudo **Minecraft**`).then(async () => {
+                        chan.send(`:hand_splayed: Bonjour **${button.clicker.user.username}** !\nMerci d'avoir cliqué sur le bouton pour vous inscrire, nous allons procéder à votre inscription.\n\nPour débuter veuillez préciser votre pseudo **Minecraft**`).then(async () => {
                             chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                 message = message.first()
                                 var mcpseudo = message.content
@@ -85,7 +86,7 @@ module.exports = class SayCommand extends Command {
 
                                 if (popo == 2) {
                                     let p = 0
-                                    chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                    chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
                                     while (p < 1) {
                                         await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                             message = message.first()
@@ -94,7 +95,7 @@ module.exports = class SayCommand extends Command {
                                                 const { uuid } = await minecraftPlayer(mcpseudo)
                                                 var u = 0
                                             } catch (error) {
-                                                chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                                chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
                                             }
                                             if (u == 0) {
                                                 p = 1
@@ -117,7 +118,7 @@ module.exports = class SayCommand extends Command {
         
                                 chan.send({embed: embed, buttons: [oui, non]});
 
-                                this.client.on('clickButton', async (button) => {
+                                chan.client.on('clickButton', async (button) => {
                                     if(button.id == "non") {
                                         button.reply.defer()
                                         oui.setDisabled()
@@ -207,8 +208,8 @@ module.exports = class SayCommand extends Command {
 
                                         const finalembed = new MessageEmbed()
                                             .setColor('GREEN')
-                                            .setTitle(`Pour finir merci de cliquer sur le bouton aproprier`)
-                                            .addField("Clicker sur le bouton aproprier", "créé vous une équipe ou alors rejoigner-en une ou alors inscriver vous meme su vous n'avez pas d'équipe")
+                                            .setTitle(`Pour finir merci de cliquer sur le bouton approprié`)
+                                            .addField("Cliquez sur le bouton approprié.", "Créer votre équipe, rejoint en une ou alors inscrivez vous simplement si vous n'avez pas d'équipes.")
 
 
 
@@ -222,16 +223,16 @@ module.exports = class SayCommand extends Command {
                                             button.message.edit({embed: finalembed, buttons: [cree, rejoindre, noteam]})
                                         }
 
-                                        this.client.on('clickButton', async (button) => {
+                                        chan.client.once('clickButton', async (button) => {
                                             if (button.id == 'cree') {
                                                 removebutton(button)
-                                                chan.send(':white_check_mark: Vous avez décider de créé une équipe. Veuiller désormais cité ne **nom** de votre équipe')
+                                                chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
                                                 await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                     message = message.first()
                                                     try {
                                                         await db.push(`${message.content}`, `${pseudo}`)
                                                         await team.push("team", `${message.content}`)
-                                                        chan.send(":white_check_mark: **Vous avez créé la team " + "`" + message.content + "`" + " avec succès**")
+                                                        chan.send(":white_check_mark: **Vous avez créé l'équipe " + "`" + message.content + "`" + " avec succès.**")
                                                     } catch (error) {
                                                         chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
                                                     }
@@ -240,13 +241,21 @@ module.exports = class SayCommand extends Command {
                                             if (button.id == 'rejoindre') {
                                                 removebutton(button)
 
-                                                chan.send(":white_check_mark: Vous avez décider de rejoindre une équipe. Veuiller désormais cité ne **nom** de l'équipe que vous vouler rejoindre")
+                                                chan.send(":white_check_mark: Vous avez décidé de rejoindre une équipe. Veuillez désormais cité le **nom** de l'équipe que vous voulez rejoindre.")
 
-                                                for (let i = 0; i < Array(await team.get('team'))[0].length; i++) {
-                                                    const element = array[i];
-                                                    
-                                                }
+                                                var listteam = new MessageEmbed()
+                                                    .setColor('GREEN')
+                                                    .setTitle("Vous avez décidé de rejoindre une équipe. Veuillez désormais cité le nom de l'équipe que vous voulez rejoindre.")
 
+                                                    var value = "";
+
+                                                    for (let i = 0; i < Array(await team.get('team'))[0].length; i++) {
+                                                        value += `**${Array(await team.get('team'))[0][i]}** - ${5 - (Array(await db.get(Array(await team.get('team'))[0][i]))[0].length)} place(s) restante(s)\n`     
+                                                    }
+
+                                                    listteam.addField("Liste des équipes:", value)
+
+                                                chan.send(listteam)
 
 
                                                 let rej = 0
@@ -255,7 +264,7 @@ module.exports = class SayCommand extends Command {
                                                         message = message.first()
 
                                                         if (await db.has(message.content) == false) {
-                                                            chan.send(":x: **Le nom d'équipe cité n'éxiste pas veuiller rentrer un nom d'équipe valide. **");
+                                                            chan.send(":x: **Le nom d'équipe cité n'existe pas veuillez rentrer un nom d'équipe valide.**");
                                                         } else {
                                                             await db.push(`${message.content}`, `${pseudo}`)
                                                             chan.send(":white_check_mark: **Vous avez rejoint la team " + "`" + message.content + "`" + " avec succès**");
@@ -293,3 +302,5 @@ module.exports = class SayCommand extends Command {
         })
     }
 }
+
+
