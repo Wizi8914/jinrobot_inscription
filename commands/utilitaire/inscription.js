@@ -5,6 +5,7 @@ const { MessageButton } = require('discord-buttons');
 let jsoning = require("jsoning");
 let db = new jsoning("db.json");
 let team = new jsoning("team.json");
+let noteamlist = new jsoning("noteam.json");
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -198,7 +199,7 @@ module.exports = class SayCommand extends Command {
                                         
                                         const rejoindre = new MessageButton()
                                             .setStyle('gray')
-                                            .setLabel('rejoindre')
+                                            .setLabel('Rejoindre')
                                             .setID('rejoindre')
                                         
                                         const noteam = new MessageButton()
@@ -266,17 +267,21 @@ module.exports = class SayCommand extends Command {
                                                         if (await db.has(message.content) == false) {
                                                             chan.send(":x: **Le nom d'équipe cité n'existe pas veuillez rentrer un nom d'équipe valide.**");
                                                         } else {
-                                                            await db.push(`${message.content}`, `${pseudo}`)
-                                                            chan.send(":white_check_mark: **Vous avez rejoint la team " + "`" + message.content + "`" + " avec succès**");
-                                                            rej = 1
+                                                            if (Array(await db.get(message.content))[0].length == 5) {
+                                                                chan.send(":x: **L'équipe cité est déja au complet veuiller en choisir une autre**")
+                                                            } else {
+                                                                await db.push(`${message.content}`, `${pseudo}`)
+                                                                chan.send(":white_check_mark: **Vous avez rejoint l'équipe " + "`" + message.content + "`" + " avec succès**");
+                                                                rej = 1
+                                                            }
                                                         }
                                                     })
                                                 }
                                             }
                                             if (button.id == "noteam") {
                                                 removebutton(button)
-
-                                                chan.send('pas de team')
+                                                noteamlist.push("noteam", `${pseudo}`)
+                                                chan.send(":white_check_mark: **Vous avez été inscrit avec succès. N'hésitez pas à trouver des coéquipiers dans le salon <#934039774040305694>**")
                                                 
                                             }
 
