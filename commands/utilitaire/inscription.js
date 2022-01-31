@@ -1,12 +1,13 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, GuildMember } = require('discord.js');
 const { Command, CommandoMessage } = require('discord.js-commando');
 const minecraftPlayer = require('minecraft-player');
 const { MessageButton } = require('discord-buttons');
 let jsoning = require("jsoning");
+var msgchannel = new Map()
+
 let db = new jsoning("db.json");
 let team = new jsoning("team.json");
 let noteamlist = new jsoning("noteam.json");
-var cooldown = false
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -45,18 +46,10 @@ module.exports = class SayCommand extends Command {
         message.say({embed: embed, buttons: [ticket]});
         this.client.on('clickButton', async (button) => {
             if(button.id == "ticket") {
-                if(cooldown == true) {
-                    button.reply.defer()
-                    return message.say(':x: **Veuiller attendre quelques instant avant de pouvoir vous inscrire. Rééseiller dans les prochaines secondes**').then(async(no) => {
-                        setTimeout(() => {
-                            no.delete()
-                        }, 3000);
-                    })
-                }
+
                 if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
-                        cooldown = true
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
                         const chan = message.guild.channels.cache.get(channel.id)
@@ -72,9 +65,12 @@ module.exports = class SayCommand extends Command {
                             }
                         ])
 
+                        msgchannel.set(button.clicker.id, channel.id)
+
                         const filter = m => button.clicker.id == m.author.id;
-                        chan.send(`:hand_splayed: Bonjour **${button.clicker.user.username}** !\nMerci d'avoir cliqué sur le bouton pour vous inscrire, nous allons procéder à votre inscription.\n\nPour débuter veuillez préciser votre pseudo **Minecraft**`).then(async () => {
-                            chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                    
+                        message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(`:hand_splayed: Bonjour **${button.clicker.user.username}** !\nMerci d'avoir cliqué sur le bouton pour vous inscrire, nous allons procéder à votre inscription.\n\nPour débuter veuillez préciser votre pseudo **Minecraft**`).then(async () => {
+                            message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                 message = message.first()
                                 var mcpseudo = message.content
 
@@ -97,7 +93,7 @@ module.exports = class SayCommand extends Command {
 
                                 if (popo == 2) {
                                     let p = 0
-                                    chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
+                                    message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
                                     while (p < 1) {
                                         await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                             message = message.first()
@@ -106,7 +102,7 @@ module.exports = class SayCommand extends Command {
                                                 const { uuid } = await minecraftPlayer(mcpseudo)
                                                 var u = 0
                                             } catch (error) {
-                                                chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
+                                                message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
                                             }
                                             if (u == 0) {
                                                 p = 1
@@ -127,7 +123,7 @@ module.exports = class SayCommand extends Command {
                                     .addField('UUID:', uuid)
                                     .setImage(mcskin)
         
-                                chan.send({embed: embed, buttons: [oui, non]});
+                                message.guild.channels.cache.get(msgchannel.get(message.author.id)).send({embed: embed, buttons: [oui, non]});
 
                                 chan.client.on('clickButton', async (button) => {
                                     if(button.id == "non") {
@@ -298,7 +294,6 @@ module.exports = class SayCommand extends Command {
                                             message.say('\n\n:warning: **Le Salon va maintenant se suprimer dans quelques instants**').then( () => {
                                                 setTimeout(() => {
                                                     chan.delete()
-                                                    cooldown = false
                                                 }, 5000);
                                             })
 
