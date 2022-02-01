@@ -52,7 +52,7 @@ module.exports = class SayCommand extends Command {
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
                         let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
                         channel.setParent(category.id);
-                        const chan = message.guild.channels.cache.get(channel.id)
+                        let chan = message.guild.channels.cache.get(channel.id)
 
                         await chan.overwritePermissions([
                             {
@@ -95,7 +95,7 @@ module.exports = class SayCommand extends Command {
                                     let p = 0
                                     message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
                                     while (p < 1) {
-                                        await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                        await message.guild.channels.cache.get(msgchannel.get(message.author.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                             message = message.first()
                                             mcpseudo = message.content
                                             try {
@@ -125,7 +125,7 @@ module.exports = class SayCommand extends Command {
         
                                 message.guild.channels.cache.get(msgchannel.get(message.author.id)).send({embed: embed, buttons: [oui, non]});
 
-                                chan.client.on('clickButton', async (button) => {
+                                message.guild.channels.cache.get(msgchannel.get(message.author.id)).client.on('clickButton', async (button) => {
                                     if(button.id == "non") {
                                         button.reply.defer()
                                         oui.setDisabled()
@@ -133,8 +133,8 @@ module.exports = class SayCommand extends Command {
 
                                         button.message.edit({embed: embed, buttons: [oui, non]})
 
-                                        chan.send(`:question: **Ce n'est pas vous ? Veuiller alors rentrer a nouveau votre pseudo Minecraft**`)
-                                        await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                        message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(`:question: **Ce n'est pas vous ? Veuiller alors rentrer a nouveau votre pseudo Minecraft**`)
+                                        await message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                             message = message.first()
                                             mcpseudo = message.content
 
@@ -146,16 +146,16 @@ module.exports = class SayCommand extends Command {
             
                                             if (pmpm == 2) {
                                                 let m = 0
-                                                chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                                message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
                                                 while (m < 1) {
-                                                    await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                    await message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                         message = message.first()
                                                         mcpseudo = message.content
                                                         try {
                                                             const { uuid } = await minecraftPlayer(mcpseudo)
                                                             var u = 0
                                                         } catch (error) {
-                                                            chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                                            message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
                                                         }
                                                         if (u == 0) {
                                                             m = 1
@@ -187,7 +187,7 @@ module.exports = class SayCommand extends Command {
                                             .addField('UUID:', uuid)
                                             .setImage(mcskin)
                 
-                                        chan.send({embed: embed, buttons: [oui, non]});
+                                            message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send({embed: embed, buttons: [oui, non]});
                                     }
 
 
@@ -220,7 +220,7 @@ module.exports = class SayCommand extends Command {
 
 
 
-                                        chan.send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+                                        message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
 
                                         function removebutton(button) {
                                             button.reply.defer()
@@ -230,25 +230,25 @@ module.exports = class SayCommand extends Command {
                                             button.message.edit({embed: finalembed, buttons: [cree, rejoindre, noteam]})
                                         }
 
-                                        chan.client.once('clickButton', async (button) => {
+                                        message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).client.once('clickButton', async (button) => {
                                             if (button.id == 'cree') {
                                                 removebutton(button)
-                                                chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
-                                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
+                                                await message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                     message = message.first()
                                                     try {
                                                         await db.push(`${message.content}`, `${pseudo}`)
                                                         await team.push("team", `${message.content}`)
-                                                        chan.send(":white_check_mark: **Vous avez créé l'équipe " + "`" + message.content + "`" + " avec succès.**")
+                                                        message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":white_check_mark: **Vous avez créé l'équipe " + "`" + message.content + "`" + " avec succès.**")
                                                     } catch (error) {
-                                                        chan.set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
+                                                        message.guild.channels.cache.get(msgchannel.get(message.author.id)).set(":x: **Une erreur c'est produite veuiller contacter un membre du staff**")
                                                     }
                                                 })
                                             }
                                             if (button.id == 'rejoindre') {
                                                 removebutton(button)
 
-                                                chan.send(":white_check_mark: Vous avez décidé de rejoindre une équipe. Veuillez désormais cité le **nom** de l'équipe que vous voulez rejoindre.")
+                                                message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(":white_check_mark: Vous avez décidé de rejoindre une équipe. Veuillez désormais cité le **nom** de l'équipe que vous voulez rejoindre.")
 
                                                 var listteam = new MessageEmbed()
                                                     .setColor('GREEN')
@@ -262,22 +262,22 @@ module.exports = class SayCommand extends Command {
 
                                                     listteam.addField("Liste des équipes:", value)
 
-                                                chan.send(listteam)
+                                                    message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(listteam)
 
 
                                                 let rej = 0
                                                 while (rej < 1) {
-                                                    await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                    await message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
                                                         message = message.first()
 
                                                         if (await db.has(message.content) == false) {
-                                                            chan.send(":x: **Le nom d'équipe cité n'existe pas veuillez rentrer un nom d'équipe valide.**");
+                                                            message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le nom d'équipe cité n'existe pas veuillez rentrer un nom d'équipe valide.**");
                                                         } else {
                                                             if (Array(await db.get(message.content))[0].length == 5) {
-                                                                chan.send(":x: **L'équipe cité est déja au complet veuiller en choisir une autre**")
+                                                                message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **L'équipe cité est déja au complet veuiller en choisir une autre**")
                                                             } else {
                                                                 await db.push(`${message.content}`, `${pseudo}`)
-                                                                chan.send(":white_check_mark: **Vous avez rejoint l'équipe " + "`" + message.content + "`" + " avec succès**");
+                                                                message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":white_check_mark: **Vous avez rejoint l'équipe " + "`" + message.content + "`" + " avec succès**");
                                                                 rej = 1
                                                             }
                                                         }
@@ -287,16 +287,9 @@ module.exports = class SayCommand extends Command {
                                             if (button.id == "noteam") {
                                                 removebutton(button)
                                                 noteamlist.push("noteam", `${pseudo}`)
-                                                chan.send(":white_check_mark: **Vous avez été inscrit avec succès. N'hésitez pas à trouver des coéquipiers dans le salon <#934039774040305694>**")
+                                                message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send(":white_check_mark: **Vous avez été inscrit avec succès. N'hésitez pas à trouver des coéquipiers dans le salon <#934039774040305694>**")
                                                 
                                             }
-
-                                            message.say('\n\n:warning: **Le Salon va maintenant se suprimer dans quelques instants**').then( () => {
-                                                setTimeout(() => {
-                                                    chan.delete()
-                                                }, 5000);
-                                            })
-
                                         })
                                     }
                                 })
