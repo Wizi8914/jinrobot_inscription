@@ -9,6 +9,10 @@ let db = new jsoning("db.json");
 let team = new jsoning("team.json");
 let noteamlist = new jsoning("noteam.json");
 
+function isObjEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
+
 module.exports = class SayCommand extends Command {
     constructor(client) {
         super(client, {
@@ -26,7 +30,7 @@ module.exports = class SayCommand extends Command {
 
     async run(message) {
         if(!message.member.hasPermission("ADMINISTRATOR")) {
-            return message.say(UserMissingPermision).then(async(no) => {
+            return message.say(":x: **Vous n'avez pas la permission seul un administrateur peut executer cette commande !**").then(async(no) => {
                 setTimeout(() => {
                     no.delete()
                 }, 5000);
@@ -220,7 +224,14 @@ module.exports = class SayCommand extends Command {
 
 
 
-                                        message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+                                        if (isObjEmpty(await team.all()) == true) {
+                                            rejoindre.setLabel("Aucune équipe créé")
+                                            rejoindre.setDisabled()
+                                            message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+                                        } else {
+                                            message.guild.channels.cache.get(msgchannel.get(button.clicker.member.id)).send({embed: finalembed, buttons: [cree, rejoindre, noteam]})
+                                        }
+                                        
 
                                         function removebutton(button) {
                                             button.reply.defer()

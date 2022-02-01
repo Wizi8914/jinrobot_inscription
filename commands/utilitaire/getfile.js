@@ -1,6 +1,6 @@
 const { Command, CommandoMessage } = require('discord.js-commando');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
-
+let jsoning = require("jsoning");
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -18,8 +18,9 @@ module.exports = class SayCommand extends Command {
      */
 
     async run(message, args) {
+
         if(!message.member.hasPermission("ADMINISTRATOR")) {
-            return message.say(UserMissingPermision).then(async(no) => {
+            return message.say(":x: **Vous n'avez pas la permission seul un administrateur peut executer cette commande !**").then(async(no) => {
                 setTimeout(() => {
                     no.delete()
                 }, 5000);
@@ -29,7 +30,6 @@ module.exports = class SayCommand extends Command {
         const db = new MessageAttachment('db.json');
         const team = new MessageAttachment('team.json');
         const noteam = new MessageAttachment('noteam.json')
-
 
         message.say(db)
         message.say(team)
