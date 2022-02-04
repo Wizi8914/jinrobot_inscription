@@ -18,10 +18,6 @@ function isObjEmpty(obj) {
     return Object.keys(obj).length === 0;
 }
 
-module.exports = {
-    msgchannel,
-    channelmsg
-}
 
 
 // ----------------- create client ----------------------------
@@ -32,90 +28,168 @@ const client = new CommandoClient({
     invite: 'https://discord.gg/WXSkpYauty',
 });
 
+module.exports = {
+    msgchannel,
+    channelmsg,
+    client
+}
 
 require('discord-buttons')(client)
 
 //=========================================================================
 
 client.on('channelCreate', chan => {
-    setTimeout(() => {
+    console.log("cree")
+    setTimeout(async () => {
         if (channelmsg.has(chan.id)) {
             const filter = m => channelmsg.get(chan.id) == m.author.id;
-            chan.send(`:hand_splayed: Bonjour **<@${channelmsg.get(chan.id)}>** !\nMerci d'avoir cliqué sur le bouton pour vous inscrire, nous allons procéder à votre inscription.\n\nPour débuter veuillez préciser votre pseudo **Minecraft**`).then(async (msg) => {
-                chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
-                    message = message.first()
-                    var mcpseudo = message.content
+            chan.send(`:hand_splayed: Bonjour **<@${channelmsg.get(chan.id)}>** !\nMerci d'avoir cliqué sur le bouton pour vous inscrire, nous allons procéder à votre inscription.\n\nPour débuter veuillez préciser votre pseudo **Minecraft**`)
 
-                    let oui = new MessageButton()
-                        .setLabel('✔️')
-                        .setID('oui')
-                        .setStyle('green')
-                                
-                    let non = new MessageButton()
-                        .setLabel('❌')
-                        .setID('non')
-                        .setStyle('red')
+            await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                message = message.first()
+                var mcpseudo = message.content
 
-                    try {
-                        const { uuid } = await minecraftPlayer(mcpseudo)
-                    } catch (error) {
-                        var popo = 2
-                    }
+                let oui = new MessageButton()
+                    .setLabel('✔️')
+                    .setID('oui')
+                    .setStyle('green')
+                            
+                let non = new MessageButton()
+                    .setLabel('❌')
+                    .setID('non')
+                    .setStyle('red')
 
-                    if (popo == 2) {
-                        let p = 0
-                        message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
-                        while (p < 1) {
-                            await message.guild.channels.cache.get(msgchannel.get(message.author.id)).awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
-                                message = message.first()
-                                mcpseudo = message.content
-                                try {
-                                    const { uuid } = await minecraftPlayer(mcpseudo)
-                                    var u = 0
-                                } catch (error) {
-                                    message.guild.channels.cache.get(msgchannel.get(message.author.id)).send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
-                                }
-                                if (u == 0) {
-                                    p = 1
-                                }
-                            })
-                        }
-                    }
+                try {
+                    const { uuid } = await minecraftPlayer(mcpseudo)
+                } catch (error) {
+                    var popo = 2
+                }
 
-                    let uuid = (await minecraftPlayer(mcpseudo)).uuid
-                    let mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
-                    let pseudo = (await minecraftPlayer(uuid)).username
-
-                    let embed = new MessageEmbed()
-                        .setColor('GREEN')
-                        .setTitle(`Est-ce bien Vous ?`)
-                        .addField('Pseudonyme:', pseudo)
-                        .addField('UUID:', uuid)
-                        .setImage(mcskin)
-
-                    const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
-                    chan.send({embed: embed, buttons: [oui, non]}).then(async but => {
-                        const collector = but.createButtonCollector(filter2, {time: 40000})
-
-                        collector.on('collect', async btn => {
-                            btn.reply.defer()
-                            collector.stop()
-                            oui.setDisabled()
-                            non.setDisabled()
-
-                            btn.message.edit({embed: embed, buttons: [oui, non]})
-
+                if (popo == 2) {
+                    let p = 0
+                    chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
+                    while (p < 1) {
+                        await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                            message = message.first()
+                            mcpseudo = message.content
+                            try {
+                                const { uuid } = await minecraftPlayer(mcpseudo)
+                                var u = 0
+                            } catch (error) {
+                                chan.send(":x: **Le pseudo préciser n'existe pas ! Veuiller le préciser a nouveau**")
+                            }
+                            if (u == 0) {
+                                p = 1
+                            }
                         })
-                    })
+                    }
+                }
 
+                let uuid = (await minecraftPlayer(mcpseudo)).uuid
+                let mcskin = `https://crafatar.com/renders/body/${uuid}?size=32&overlay`
+                let pseudo = (await minecraftPlayer(uuid)).username
 
+                let embed = new MessageEmbed()
+                    .setColor('GREEN')
+                    .setTitle(`Est-ce bien Vous ?`)
+                    .addField('Pseudonyme:', pseudo)
+                    .addField('UUID:', uuid)
+                    .setImage(mcskin)
 
+                const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
+                chan.send({embed: embed, buttons: [oui, non]}).then(async but => {
+                    const collector = but.createButtonCollector(filter2, {time: 40000})
 
+                    collector.on('collect', async btn => {
+                        btn.reply.defer()
+                        collector.stop()
+                        oui.setDisabled()
+                        non.setDisabled()
 
-                })
+                        btn.message.edit({embed: embed, buttons: [oui, non]})
+
+                        if (btn.id == "non") {
+                            let ll = 0
+                            while (ll < 1) {
+                                console.log('bou')
+                                chan.send(`:question: **Ce n'est pas vous ? Veuiller alors rentrer a nouveau votre pseudo Minecraft**`)
+                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                    message = message.first()
+                                    mcpseudo = message.content
+
+                                    let oui = new MessageButton()
+                                        .setLabel('✔️')
+                                        .setID('oui')
+                                        .setStyle('green')
+                            
+                                    let non = new MessageButton()
+                                        .setLabel('❌')
+                                        .setID('non')
+                                        .setStyle('red')
+
+                                    try {
+                                        const { uuid } = await minecraftPlayer(mcpseudo)
+                                    } catch (error) {
+                                        var pmpm = 2
+                                    }
             
+                                    if (pmpm == 2) {
+                                        let m = 0
+                                        chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                        while (m < 1) {
+                                            await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                message = message.first()
+                                                mcpseudo = message.content
+                                                try {
+                                                    const { uuid } = await minecraftPlayer(mcpseudo)
+                                                    var u = 0
+                                                } catch (error) {
+                                                    chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
+                                                }
+                                                if (u == 0) {
+                                                     m = 1
+                                                }
+                                            })
+                                        }
+                                    }
+
+                                    const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
+                                    await chan.send({embed: embed, buttons: [oui, non]}).then(async but => {
+                                        const collector = but.createButtonCollector(filter2, {time: 40000})
+
+                                        console.log('arretes')
+                                        await collector.on('collect', async btn => {
+                                            btn.reply.defer()
+                                            collector.stop()
+                                            oui.setDisabled()
+                                            non.setDisabled()
+
+                                            btn.message.edit({embed: embed, buttons: [oui, non]})
+
+                                            if (btn.id == "oui") {
+                                                ll = 1
+                                            }
+
+                                        })
+                                    })
+
+                                })
+                            }
+                            
+                        }
+
+                        if (btn.id == "oui") {
+                            lm = 1
+                        }
+
+                    })
+                })
+
             })
-        } 
+        
+                 
+                
+        }
     }, 1000);
 })
 
