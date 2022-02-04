@@ -158,15 +158,15 @@ client.on('channelCreate', chan => {
                                         const collector = but.createButtonCollector(filter2, {time: 40000})
 
                                         console.log('arretes')
-                                        await collector.on('collect', async btn => {
-                                            btn.reply.defer()
+                                        await collector.on('collect', async butt => {
+                                            butt.reply.defer()
                                             collector.stop()
                                             oui.setDisabled()
                                             non.setDisabled()
 
-                                            btn.message.edit({embed: embed, buttons: [oui, non]})
+                                            butt.message.edit({embed: embed, buttons: [oui, non]})
 
-                                            if (btn.id == "oui") {
+                                            if (butt.id == "oui") {
                                                 ll = 1
                                             }
 
