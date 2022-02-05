@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "github:discordjs/opus",
+    "atomic-sleep": "^1.0.0",
     "canvas": "^2.7.0",
     "cpu-stat": "^2.0.1",
     "deepl": "^1.0.12",
