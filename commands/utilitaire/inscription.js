@@ -1,18 +1,8 @@
-const { MessageEmbed, GuildMember } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { Command, CommandoMessage } = require('discord.js-commando');
-const minecraftPlayer = require('minecraft-player');
 const { MessageButton } = require('discord-buttons');
-let jsoning = require("jsoning");
 const { msgchannel, channelmsg } = require('../..');
 
-
-let db = new jsoning("db.json");
-let team = new jsoning("team.json");
-let noteamlist = new jsoning("noteam.json");
-
-function isObjEmpty(obj) {
-    return Object.keys(obj).length === 0;
-}
 
 module.exports = class SayCommand extends Command {
     constructor(client) {
@@ -53,7 +43,8 @@ module.exports = class SayCommand extends Command {
         message.say({embed: embed, buttons: [ticket]});
         this.client.on('clickButton', async (button) => {
             if(button.id == "ticket") {
-                if(!message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
+                console.log(button.clicker.user)
+                if(!await message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
                     button.reply.defer()
                     message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
                         msgchannel.set(button.clicker.id, channel.id)
