@@ -232,7 +232,7 @@ client.on('channelCreate', chan => {
                                                     noteam.setDisabled()
                                                     collector.stop()
 
-                                                    btn.message.edit({embed: embed, buttons: [cree, rejoindre, noteam]})
+                                                    btn.message.edit({embed: finalembed, buttons: [cree, rejoindre, noteam]})
                                                     
                                                     if (btn.id == 'cree') {
                                                         chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
@@ -340,7 +340,7 @@ client.on('channelCreate', chan => {
                                         noteam.setDisabled()
                                         collector.stop()
 
-                                        btn.message.edit({embed: embed, buttons: [cree, rejoindre, noteam]})
+                                        btn.message.edit({embed: finalembed, buttons: [cree, rejoindre, noteam]})
                                         
                                         if (btn.id == 'cree') {
                                             chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')

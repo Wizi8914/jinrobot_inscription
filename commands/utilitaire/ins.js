@@ -1,0 +1,87 @@
+const { MessageEmbed } = require('discord.js');
+const { Command, CommandoMessage } = require('discord.js-commando');
+const { MessageButton } = require('discord-buttons');
+const { msgchannel, channelmsg } = require('../..');
+
+
+module.exports = class SayCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'ins',
+            group: 'utilitaire',
+            memberName: 'ins',
+            description: "le process d'einscription"
+        });
+    }
+
+    /**
+     * 
+     * @param {CommandoMessage} message 
+     */
+
+    
+    async run(message) {
+
+        if(!message.member.hasPermission("ADMINISTRATOR")) {
+            return message.say(UserMissingPermision).then(async(no) => {
+                setTimeout(() => {
+                    no.delete()
+                }, 5000);
+            })
+        }
+        
+        const embed = new MessageEmbed()
+            .setColor('BLUE')
+            .setTitle(`Cliquez sur la réaction pour vous inscrire !`)
+
+        const ticket = new MessageButton()
+            .setStyle('gray')
+            .setLabel('📩')
+            .setID('ticket')
+
+        message.delete()
+        message.say({embed: embed, buttons: [ticket]});
+        this.client.on('clickButton', async (button) => {
+            if(button.id == "ticket") {
+                console.log(button.clicker.user)
+                if(!await message.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
+                    button.reply.defer()
+                    message.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
+                        msgchannel.set(button.clicker.id, channel.id)
+                        channelmsg.set(channel.id, button.clicker.id)
+                        let category = message.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
+                        channel.setParent(category.id);
+                        let chan = message.guild.channels.cache.get(channel.id)
+
+
+                        await chan.overwritePermissions([
+                            {
+                                id: "933760704006209649", 
+                                deny: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: button.clicker.user.id, 
+                                allow: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: message.guild.roles.everyone,
+                                deny: ["VIEW_CHANNEL"]
+
+                            }
+                        ])
+
+                
+                    })
+                } else {
+                    button.reply.defer()
+                    message.say(':x: **Vous avez déja créé un channel !**').then(async(no) => {
+                        setTimeout(() => {
+                            no.delete()
+                        }, 5000);
+                    })
+                }
+            } 
+        
+        })
+    }
+}
