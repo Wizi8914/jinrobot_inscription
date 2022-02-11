@@ -2,6 +2,7 @@ const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const minecraftPlayer = require('minecraft-player');
 const { MessageButton } = require('discord-buttons');
+const slash = require('discord-slash-commands-v12');
 let jsoning = require("jsoning");
 const path = require('path');
 require('dotenv').config()
@@ -22,7 +23,6 @@ function isObjEmpty(obj) {
 
 
 // ----------------- create client ----------------------------
-
 const client = new CommandoClient({
     commandPrefix: '>',
     owner: '505762041789808641',
@@ -38,6 +38,91 @@ module.exports = {
 require('discord-buttons')(client)
 
 //=========================================================================
+
+const {REST} = require('@discordjs/rest');
+const {Routes} = require('discord-api-types/v9');
+const commands = [
+  {
+    name: 'inscription',
+    description: "📩 Commande d'inscription (En dévelopement)",
+  },
+];
+
+const rest = new REST({version: '9'}).setToken(process.env.DISCORD_TOKEN);
+
+(async () => {
+  try {
+    console.log('Started refreshing application (/) commands.');
+
+    await rest.put(Routes.applicationCommands(process.env.APP_ID), {
+      body: commands,
+    });
+
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isCommand()) return;
+
+	if (interaction.commandName === 'inscription') {
+		await interaction.reply('test');
+	}
+});
+
+
+client.on('clickButton', async (button) => {
+    if(button.id == "ticketins") {
+        try {
+            button.clicker.user.username
+        } catch (error) {
+            button.channel.send(":x: **Il s'emblerais qu'il y ai une erreur veuillez cliquer sur le bouton ou alors taper la commande `>inscription`**").then(async(no) => {
+                setTimeout(() => {
+                    no.delete()
+                }, 5000);
+            })
+        }
+        if(!await button.guild.channels.cache.find(ch => ch.name === `${button.clicker.user.username.toLocaleLowerCase()}┊inscription`)) {
+            button.reply.defer()
+            button.guild.channels.create(`${button.clicker.user.username}┊inscription`).then(async (channel) => {
+                msgchannel.set(button.clicker.id, channel.id)
+                channelmsg.set(channel.id, button.clicker.id)
+                let category =button.guild.channels.cache.find(c => c.name == "INSCRIPTION" && c.type == "category");
+                channel.setParent(category.id);
+                let chan = button.guild.channels.cache.get(channel.id)
+
+
+                await chan.overwritePermissions([
+                    {
+                        id: "933760704006209649", 
+                        deny: ["VIEW_CHANNEL"]
+                    },
+                    {
+                        id: button.clicker.user.id, 
+                        allow: ["VIEW_CHANNEL"]
+                    },
+                    {
+                        id: button.guild.roles.everyone,
+                        deny: ["VIEW_CHANNEL"]
+
+                    }
+                ])
+
+        
+            })
+        } else {
+            button.reply.defer()
+            button.channel.send(':x: **Vous avez déja créé un channel !**').then(async(no) => {
+                setTimeout(() => {
+                    no.delete()
+                }, 5000);
+            })
+        }
+    } 
+
+})
 
 client.on('channelCreate', chan => {
     setTimeout(async () => {
@@ -122,7 +207,7 @@ client.on('channelCreate', chan => {
 
                             if(btnn.id == "non") { 
                                 chan.send(`:question: **Ce n'est pas vous ? Veuiller alors rentrer a nouveau votre pseudo Minecraft**`)
-                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                await chan.awaitMessages(filter, { max: 1, time: 9000000, errors: ['time']}).then(async (message) => {
                                     message = message.first()
                                     mcpseudo = message.content
 
@@ -136,7 +221,7 @@ client.on('channelCreate', chan => {
                                         let m = 0
                                         chan.send(":x: **Le pseudo cité n'existe pas ! Veuiller le cité a nouveau**")
                                         while (m < 1) {
-                                            await chan.awaitMessages(filter, { max: 1, time: 900000, errors: ['time']}).then(async (message) => {
+                                            await chan.awaitMessages(filter, { max: 1, time: 90000000, errors: ['time']}).then(async (message) => {
                                                 message = message.first()
                                                 mcpseudo = message.content
                                                 try {
@@ -178,7 +263,7 @@ client.on('channelCreate', chan => {
                                 chan.send({embed: embed, buttons: [oui, non]}).then(async but => {
                                     const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
                                         
-                                    const coll = but.createButtonCollector(filter2, {time: 400000})
+                                    const coll = but.createButtonCollector(filter2, {time: 9000000})
                                     await coll.on('collect', async bt => {
                                         bt.reply.defer()
                                         oui.setDisabled()
@@ -223,7 +308,7 @@ client.on('channelCreate', chan => {
                                             chan.send({embed: finalembed, buttons: [cree, rejoindre, noteam]}).then(async but => {
                                                 const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
             
-                                                const collector = but.createButtonCollector(filter2, {time: 40000})
+                                                const collector = but.createButtonCollector(filter2, {time: 9000000})
                             
                                                 collector.on('collect', async btn => {
                                                     btn.reply.defer()
@@ -236,7 +321,7 @@ client.on('channelCreate', chan => {
                                                     
                                                     if (btn.id == 'cree') {
                                                         chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
-                                                        await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                        await chan.awaitMessages(filter, { max: 1, time: 9000000, errors: ['time']}).then(async (message) => {
                                                             message = message.first()
                                                             try {
                                                                 await db.push(`${message.content}`, `${pseudo}`)
@@ -268,7 +353,7 @@ client.on('channelCreate', chan => {
             
                                                         let rej = 0
                                                         while (rej < 1) {
-                                                            await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                            await chan.awaitMessages(filter, { max: 1, time: 9000000, errors: ['time']}).then(async (message) => {
                                                                 message = message.first()
             
                                                                 if (await db.has(message.content) == false) {
@@ -331,7 +416,7 @@ client.on('channelCreate', chan => {
                                 chan.send({embed: finalembed, buttons: [cree, rejoindre, noteam]}).then(async but => {
                                     const filter2 = m => m.clicker.user.id == channelmsg.get(chan.id);
 
-                                    const collector = but.createButtonCollector(filter2, {time: 40000})
+                                    const collector = but.createButtonCollector(filter2, {time: 4000000})
                 
                                     collector.on('collect', async btn => {
                                         btn.reply.defer()
@@ -344,7 +429,7 @@ client.on('channelCreate', chan => {
                                         
                                         if (btn.id == 'cree') {
                                             chan.send(':white_check_mark: Vous avez décidé de créer une équipe. Veuillez désormais cité le **nom** de votre équipe.')
-                                            await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                            await chan.awaitMessages(filter, { max: 1, time: 9000000, errors: ['time']}).then(async (message) => {
                                                 message = message.first()
                                                 try {
                                                     await db.push(`${message.content}`, `${pseudo}`)
@@ -376,7 +461,7 @@ client.on('channelCreate', chan => {
 
                                             let rej = 0
                                             while (rej < 1) {
-                                                await chan.awaitMessages(filter, { max: 1, time: 90000, errors: ['time']}).then(async (message) => {
+                                                await chan.awaitMessages(filter, { max: 1, time: 9000000, errors: ['time']}).then(async (message) => {
                                                     message = message.first()
 
                                                     if (await db.has(message.content) == false) {
